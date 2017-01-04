@@ -1,0 +1,13 @@
+package scheduler;
+
+import "NotRecordReason.proto";
+import "RecordingStatus.proto";
+import "RecordingType.proto";
+
+option java_package = "com.comcast.data.protobuf.message.scheduler";
+option java_outer_classname = "MinimalListingDataProto";
+
+message MinimalListingData {
+  required int64 listingId = 1;
+  required int64 programId = 2;
+}

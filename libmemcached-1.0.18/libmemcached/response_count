@@ -1,0 +1,184 @@
+auto.cc:    rc= memcached_response(instance, &instance->root->result);
+auto.cc:    assert(memcached_last_error(instance->root) != MEMCACHED_SUCCESS);
+auto.cc:    assert(memcached_last_error(instance->root) != MEMCACHED_NOTFOUND);
+auto.cc:    *value= instance->root->result.numeric_value;
+auto.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+auto.cc:  request.message.header.request.keylen= htons((uint16_t)(key_length + memcached_array_size(instance->root->_namespace)));
+auto.cc:  request.message.header.request.bodylen= htonl((uint32_t)(key_length + memcached_array_size(instance->root->_namespace) +request.message.header.request.extlen));
+auto.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+auto.cc:  bool reply= memcached_is_replying(instance->root);
+auto.cc:  bool reply= memcached_is_replying(instance->root);
+behavior.cc:        if (getsockopt(instance->fd, SOL_SOCKET, SO_SNDBUF, (char*)&sock_size, &sock_length) < 0)
+behavior.cc:        if (getsockopt(instance->fd, SOL_SOCKET, SO_RCVBUF, (char*)&sock_size, &sock_length) < 0)
+common.h:  instance->events(POLLIN);
+common.h:  instance->cursor_active_++;
+delete.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+delete.cc:  request.message.header.request.keylen= htons(uint16_t(key_length + memcached_array_size(instance->root->_namespace)));
+delete.cc:  request.message.header.request.bodylen= htonl(uint32_t(key_length + memcached_array_size(instance->root->_namespace)));
+delete.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+delete.cc:    assert(memcached_last_error(instance->root) != MEMCACHED_SUCCESS);
+delete.cc:      if (server_key == memcached_server_count(instance->root))
+delete.cc:      memcached_instance_st* replica= memcached_instance_fetch(instance->root, server_key);
+delete.cc:        assert(memcached_last_error(instance->root) != MEMCACHED_SUCCESS);
+delete.cc:  bool is_buffering= memcached_is_buffering(instance->root);
+delete.cc:  bool is_replying= memcached_is_replying(instance->root);
+do.cc:    return memcached_set_error(*instance->root, MEMCACHED_NOT_SUPPORTED, MEMCACHED_AT, 
+do.cc:  vector[0].buffer= instance->write_buffer;
+do.cc:    ssize_t sendmsg_length= ::sendmsg(instance->fd, &msg, 0);
+do.cc:    assert_msg(instance->error_messages, "memcached_connect() returned an error but the Instance showed none.");
+do.cc:  if (memcached_is_udp(instance->root))
+do.cc:    assert(memcached_last_error(instance->root) == MEMCACHED_SUCCESS);
+do.cc:    if (memcached_last_error(instance->root) == MEMCACHED_SUCCESS)
+do.cc:      assert(memcached_last_error(instance->root) != MEMCACHED_SUCCESS);
+do.cc:      rc= memcached_last_error(instance->root);
+do.cc:  else if (memcached_is_replying(instance->root))
+error.cc:    _error_print(instance->error_messages);
+error.cc:  if (instance and instance->error_messages)
+error.cc:    return instance->error_messages->rc;
+flush_buffers.cc:      if (instance->write_buffer_offset != 0) 
+flush_buffers.cc:        if (instance->fd == INVALID_SOCKET and
+flush.cc:      if (instance->error_messages == NULL or instance->root->error_messages == NULL)
+flush.cc:    if (instance->response_count() > 0)
+flush.cc:      if (instance->error_messages == NULL or instance->root->error_messages == NULL)
+get.cc:    if (instance->response_count())
+get.cc:      while(instance->response_count())
+get.cc:    if (instance->response_count() == 0)
+get.cc:      WATCHPOINT_ASSERT(instance->cursor_active_ == 0);
+get.cc:      WATCHPOINT_ASSERT(instance->cursor_active_ == 1);
+get.cc:    if (instance->response_count())
+get.cc:    if (instance->response_count() == 0)
+get.cc:      if (instance->response_count())
+get.cc:      if (instance->response_count() == 0)
+io.cc:  if (instance->read_ptr != instance->read_buffer)
+io.cc:    memmove(instance->read_buffer, instance->read_ptr, instance->read_buffer_length);
+io.cc:    instance->read_ptr= instance->read_buffer;
+io.cc:    instance->read_data_length= instance->read_buffer_length;
+io.cc:  if (instance->read_buffer_length != MEMCACHED_MAX_BUFFER)
+io.cc:      if ((nr= ::recv(instance->fd,
+io.cc:                      instance->read_ptr + instance->read_data_length,
+io.cc:                      MEMCACHED_MAX_BUFFER - instance->read_data_length,
+io.cc:        instance->read_data_length+= size_t(nr);
+io.cc:        instance->read_buffer_length+= size_t(nr);
+io.cc:  if (instance->root->callbacks != NULL)
+io.cc:    memcached_callback_st cb= *instance->root->callbacks;
+io.cc:    memcached_set_processing_input((Memcached *)instance->root, true);
+io.cc:    Memcached *root= (Memcached *)instance->root;
+io.cc:        error= (*cb.callback[x])(instance->root, &root->result, cb.context);
+io.cc:  fds.fd= instance->fd;
+io.cc:    instance->io_wait_count.write++;
+io.cc:    instance->io_wait_count.read++;
+io.cc:  if (instance->root->poll_timeout == 0) // Mimic 0 causes timeout behavior (not all platforms do this)
+io.cc:    int active_fd= poll(&fds, 1, instance->root->poll_timeout);
+io.cc:        if (getsockopt(instance->fd, SOL_SOCKET, SO_ERROR, (char*)&err, &len) == 0)
+io.cc:    WATCHPOINT_ASSERT(instance->fd != INVALID_SOCKET);
+io.cc:  char *local_write_ptr= instance->write_buffer;
+io.cc:  size_t write_length= instance->write_buffer_offset;
+io.cc:  WATCHPOINT_ASSERT(instance->fd != INVALID_SOCKET);
+io.cc:    WATCHPOINT_ASSERT(instance->write_buffer == local_write_ptr);
+io.cc:  WATCHPOINT_ASSERT((instance->write_buffer + MEMCACHED_MAX_BUFFER) >= (local_write_ptr + write_length));
+io.cc:    WATCHPOINT_ASSERT(instance->fd != INVALID_SOCKET);
+io.cc:    ssize_t sent_length= ::send(instance->fd, local_write_ptr, write_length, flags);
+io.cc:        WATCHPOINT_ASSERT(instance->fd == INVALID_SOCKET);
+io.cc:    instance->io_bytes_sent+= uint32_t(sent_length);
+io.cc:  instance->write_buffer_offset= 0;
+io.cc:    data_read= ::recv(instance->fd, instance->read_buffer, MEMCACHED_MAX_BUFFER, MSG_NOSIGNAL);
+io.cc:        assert_msg(instance->fd != INVALID_SOCKET, "Programmer error, invalid socket");
+io.cc:    instance->io_wait_count._bytes_read+= data_read;
+io.cc:  instance->io_bytes_sent= 0;
+io.cc:  instance->read_data_length= (size_t) data_read;
+io.cc:  instance->read_buffer_length= (size_t) data_read;
+io.cc:  instance->read_ptr= instance->read_buffer;
+io.cc:  assert(memcached_is_udp(instance->root) == false);
+io.cc:  if (instance->fd == INVALID_SOCKET)
+io.cc:    assert_msg(int(instance->state) <= int(MEMCACHED_SERVER_STATE_ADDRINFO), "Programmer error, invalid socket state");
+io.cc:    if (instance->read_buffer_length == 0)
+io.cc:      size_t difference= (length > instance->read_buffer_length) ? instance->read_buffer_length : length;
+io.cc:      memcpy(buffer_ptr, instance->read_ptr, difference);
+io.cc:      instance->read_ptr+= difference;
+io.cc:      instance->read_buffer_length-= difference;
+io.cc:      *buffer_ptr= *instance->read_ptr;
+io.cc:      instance->read_ptr++;
+io.cc:      instance->read_buffer_length--;
+io.cc:  assert(memcached_is_udp(instance->root) == false);
+io.cc:  if (instance->fd == INVALID_SOCKET)
+io.cc:    assert_msg(int(instance->state) <= int(MEMCACHED_SERVER_STATE_ADDRINFO), "Invalid socket state");
+io.cc:    data_read= ::recv(instance->fd, instance->read_buffer, sizeof(buffer), MSG_NOSIGNAL);
+io.cc:        assert_msg(instance->fd != INVALID_SOCKET, "Invalid socket state");
+io.cc:  assert(instance->fd != INVALID_SOCKET);
+io.cc:  assert(memcached_is_udp(instance->root) == false);
+io.cc:    size_t should_write= buffer_end -instance->write_buffer_offset;
+io.cc:    write_ptr= instance->write_buffer + instance->write_buffer_offset;
+io.cc:    instance->write_buffer_offset+= should_write;
+io.cc:    if (instance->write_buffer_offset == buffer_end)
+io.cc:      WATCHPOINT_ASSERT(instance->fd != INVALID_SOCKET);
+io.cc:    WATCHPOINT_ASSERT(instance->fd != INVALID_SOCKET);
+io.cc:    if (instance->read_buffer_length > 0) /* I have data in the buffer */
+io.cc:    if (instance->response_count() > 0)
+io.cc:      fds[host_index].fd= instance->fd;
+io.cc:      if (instance->response_count() > 0)
+io.cc:          if (instance->fd == fds[x].fd)
+io.cc:    if (instance->read_buffer_length == 0)
+io.cc:    while (instance->read_buffer_length and total_nr < size and line_complete == false)
+io.cc:      *buffer_ptr = *instance->read_ptr;
+io.cc:      --instance->read_buffer_length;
+io.cc:      ++instance->read_ptr;
+quit.cc:    if (instance->root->flags.binary_protocol)
+quit.cc:    if (instance->root->flags.buffer_requests or instance->root->number_of_replicas)
+quit.cc:    instance->server_failure_counter= 0;
+quit.cc:    instance->server_timeout_counter= 0;
+quit.cc:  if (instance->valid())
+quit.cc:    if (io_death == false and memcached_is_udp(instance->root) == false and instance->is_shutting_down() == false)
+quit.cc:      instance->start_close_socket();
+quit.cc:  instance->close_socket();
+quit.cc:  if (io_death and memcached_is_udp(instance->root))
+response.cc:  WATCHPOINT_ASSERT(instance->root);
+response.cc:    for (ptrdiff_t prefix_length= memcached_array_size(instance->root->_namespace); !(iscntrl(*string_ptr) || isspace(*string_ptr)) ; string_ptr++)
+response.cc:  if (memcached_is_encrypted(instance->root) and memcached_result_length(result))
+response.cc:    if ((destination= hashkit_decrypt(&instance->root->hashkit,
+response.cc:      rc= memcached_set_error(*instance->root, MEMCACHED_FAILURE, 
+response.cc:        rc= memcached_set_error(*instance->root, MEMCACHED_FAILURE, 
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->major_version= uint8_t(version);
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->minor_version= uint8_t(version);
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->micro_version= uint8_t(version);
+response.cc:            buffer, MEMCACHED_MAX_BUFFER, instance->read_buffer);
+response.cc:  assert(memcached_is_binary(instance->root));
+response.cc:          if (memcached_array_size(instance->root->_namespace) and memcached_array_size(instance->root->_namespace) >= result->key_length)
+response.cc:          if (memcached_array_size(instance->root->_namespace))
+response.cc:            result->key_length-= memcached_array_size(instance->root->_namespace);
+response.cc:            memmove(result->item_key, result->item_key +memcached_array_size(instance->root->_namespace), result->key_length);
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->major_version= uint8_t(version);
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->minor_version= uint8_t(version);
+response.cc:          instance->major_version= instance->minor_version= instance->micro_version= UINT8_MAX;
+response.cc:        instance->micro_version= uint8_t(version);
+response.cc:    Memcached *root= (Memcached *)instance->root;
+response.cc:  if (memcached_is_binary(instance->root))
+response.cc:  if (memcached_is_udp(instance->root))
+response.cc:  if (memcached_is_udp(instance->root))
+response.cc:  if ((instance->root->flags.no_block) and (memcached_is_processing_input(instance->root) == false))
+response.cc:  if (memcached_is_binary(instance->root) == false and memcached_server_response_count(instance) > 1)
+response.cc:    memcached_result_st *junked_result_ptr= memcached_result_create(instance->root, &junked_result);
+server.cc:    return instance->major_version;
+server.cc:    return instance->minor_version;
+server.cc:    return instance->micro_version;
+stats.cc:  instance->cursor_active_= 0;
+stats.cc:    stat_instance->pid= -1;
+stats.cc:    stat_instance->root= self;
+storage.cc:  WATCHPOINT_SET(instance->io_wait_count.read= 0);
+storage.cc:  WATCHPOINT_SET(instance->io_wait_count.write= 0);
+storage.cc:  if (memcached_is_buffering(instance->root) and verb == SET_OP)
+touch.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+touch.cc:  request.message.header.request.keylen= htons((uint16_t)(key_length +memcached_array_size(instance->root->_namespace)));
+touch.cc:  request.message.header.request.bodylen= htonl((uint32_t)(key_length +memcached_array_size(instance->root->_namespace) +request.message.header.request.extlen));
+touch.cc:    { memcached_array_string(instance->root->_namespace), memcached_array_size(instance->root->_namespace) },
+version.cc:    if (instance->major_version != UINT8_MAX)
+version.cc:    if (instance->major_version != UINT8_MAX)
+version.cc:  if (instance->major_version != UINT8_MAX)
+version.cc:  if (instance->major_version != UINT8_MAX)
+version.cc:      if (memcached_is_fetching_version(instance->root))
+version.cc:        if (memcached_is_udp(instance->root) == false)
+version.cc:          if (memcached_is_binary(instance->root))

@@ -1,0 +1,29 @@
+package scheduler;
+
+import "AiringType.proto";
+import "Rating.proto";
+
+option java_package = "com.comcast.data.protobuf.message.scheduler";
+option java_outer_classname = "ListingDataProto";
+
+message ListingData {
+  optional AiringType airingType = 1;
+  optional string audioType = 2;
+  optional string captionType = 3;
+  optional Rating schedulerContentRating = 4;
+  required bool isAdult = 5;
+  optional string hdLevel = 6;
+  optional string seriesGuid = 7;
+  optional string showingType = 8;
+  required bool isSAP = 9;
+  required bool isSubTitled = 10;
+  required bool isThreeD = 11;
+  optional string programGuid = 12;
+  required int64 programStart = 13;
+  required int64 programEnd = 14;
+  optional string listingGuid = 15;
+  optional int32 seasonNumber = 16;
+  optional int32 episodeNumber = 17;
+  optional string episodeTitle = 18;
+  optional string strProgramType = 19;
+}

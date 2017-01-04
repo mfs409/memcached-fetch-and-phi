@@ -1,0 +1,42 @@
+package scheduler;
+
+import "NotRecordReason.proto";
+import "RecordingStatus.proto";
+import "RecordingType.proto";
+import "DeletePriority.proto";
+import "ListingData.proto";
+import "RecordingOptions.proto";
+import "RecordingSegment.proto";
+
+option java_package = "com.comcast.data.protobuf.message.scheduler";
+option java_outer_classname = "RecordingProto";
+
+message Recording {
+
+  optional string id = 1;
+  optional string accountGuid = 2;
+  optional string deviceGuid = 3;
+  optional string sourceGuid = 4;
+  optional string entityId = 5;
+  required int64 startTime = 6;
+  required int64 endTime = 7;
+  optional string stationGuid = 8;
+  required int32 channelNumber = 9;
+  optional DeletePriority deletePriority = 10;
+  optional NotRecordReason notRecordReason = 11;
+  optional RecordingStatus status = 12;
+  optional RecordingType recordingType = 13;
+  optional string failureReason = 14;
+  optional RecordingOptions schedulerRecordingOptions = 15;
+  repeated RecordingSegment segments = 16;
+  optional string title = 17;
+  optional string description = 18;
+  required bool watched = 19;
+  required bool payPerView = 20;
+  required int32 entitlementId = 21;
+  optional RecordingStatus undeleteStatus = 22;
+  required int64 timeDeleted = 23;
+  repeated ListingData listingDataList = 24;
+  optional string parentDeviceGuid = 25;
+  optional string listingGuid = 26;
+}

@@ -1,0 +1,6 @@
+package test;
+
+message Ints {
+	optional fixed32 data = 1;
+	repeated fixed32 arr = 2;
+}

@@ -1,0 +1,13 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "RecordingTypeProto";
+
+enum RecordingType {
+    HotRecording = 0;
+    OneTimeRecording = 1;
+    SeriesRecording = 2;
+    AutoRecording = 3;
+    ChannelHotRecording = 4;
+    ChannelOneTimeRecording = 5;
+}

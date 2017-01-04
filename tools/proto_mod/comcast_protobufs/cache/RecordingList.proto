@@ -1,0 +1,10 @@
+package scheduler.cache;
+
+option java_package = "com.comcast.data.protobuf.message.scheduler.cache";
+option java_outer_classname = "RecordingListProto";
+
+import "Recording.proto";
+
+message RecordingList {
+    repeated Recording recordings = 1;
+}

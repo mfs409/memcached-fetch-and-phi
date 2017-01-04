@@ -1,0 +1,345 @@
+/*
+ *This program runs benchmarking for our builds of memcached. 
+ */
+
+#include <fstream>
+#include <iostream>
+#include <thread>
+#include <libmemcached/memcached.h>
+#include <string.h>
+#include <list>
+#include <atomic>
+#include <chrono>
+#include <random>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+//local
+//#include "bmconfig.h"
+#include "test.pb.h"
+#include "timing.h"
+#include "protostream.h"
+
+//namespaces
+using namespace std;
+
+//constants
+const char* MEM_SERVER_CONF = "--BINARY-PROTOCOL --SERVER=localhost:";
+const char* MEM_SERVER_FLAGS = " -p ";
+const int MAX_THREADS = 1024; //default for memcached servers
+const long MEGA_BYTE = 1048576;
+
+//globals
+map<string, char> keyMap;
+
+//structs
+struct Config {
+	char* buildLoc;
+	char* port;
+	int num_threads;
+	int num_objects;
+	float obj_dist;
+	int num_cmds;
+	
+	//fields for final statistics
+	uint64_t time; //time of total bench in nanoseconds
+
+	Config() : port(NULL), num_threads(1), num_objects(32),
+		obj_dist(0.5), num_cmds(10000) {
+		buildLoc = new char[64];
+		strcpy(buildLoc, "memcached_build/bin/memcached");
+	}
+	~Config() {
+		free(buildLoc);
+	}
+} config;
+
+//function prototypes
+memcached_return_t set(memcached_st* memc, const char* key, const char* val);
+memcached_return_t get(memcached_st* memc, const char* key, char** val); //val returned, must be freed
+memcached_return_t uu_set(memcached_st* memc, const char* key, const char* val, size_t size);
+memcached_return_t uu_get(memcached_st* memc, const char* key, char** val);
+void randStr(string& str, int len);
+	
+//static functions
+//print driver cli usage
+void usage() {
+	cerr << "driver usage: " << endl;
+	cerr << "\t-m FILE_PATH, path to binary of memcached to be run" << endl;
+	cerr << "\t-t NUM_THREADS, number of threads to create connections" << endl;
+	cerr << "\t-p PORT, specify port to run memcached server default 11111" << endl;
+	cerr << "\t-o NUM_OBJECTS, number of objects to load into the cache on start" << endl;
+	cerr << "\t-d OBJ_SIZE_DIST, the distribution of object sizes in the cache" << endl;
+	cerr << "\t-c NUM_CMDS, the number of commands to execute (even number of set and get)" << endl;
+}
+
+//initializes the config struct based on input arguments. Returns -1 on failure, 0 on success
+int benchConfig(int argc, char** argv, Config& config) {
+	char ch;
+	while((ch = getopt(argc, argv, "m:t:p:o:d:c:")) != -1) {
+		switch(ch) {
+			case 'm': 
+				config.buildLoc = new char[strlen(optarg) + 1];
+				strcpy(config.buildLoc, optarg);
+				break;
+			case 't':
+				config.num_threads = atoi(optarg);
+				if(config.num_threads > MAX_THREADS) {
+					config.num_threads = MAX_THREADS;
+				}
+				break;
+			case 'p':
+				config.port = new char[strlen(optarg) + 1];
+				strcpy(config.port, optarg);
+				break;
+			case 'o':
+				config.num_objects = atoi(optarg);
+				break;
+			case 'd':
+				config.obj_dist = atof(optarg);
+				break;
+			case 'c':
+				config.num_cmds = atoi(optarg);
+				break;
+			case '?':
+				usage();
+				return -1;
+			default:
+				cerr << "Invalid option " << ch << endl;
+				usage();
+				return -1;
+		}
+	}
+	return 0;
+}
+
+//the input line to be parsed, and the resulting argv which may be used for executing commands
+void parseArgs(char* input, char** argv) {
+	while(*input != '\0') {
+		//treat all leading whitespace
+		while(*input == ' ' || *input == '\r' || *input == '\n' || *input == '\t') {
+			*input = '\0';
+			input++;
+		}
+		//non-whitespace found, set start of next argument
+		*argv = input;
+		argv++;
+		//skip util next non-whitespace or null
+		while(*input != ' ' && *input != '\r' && *input != '\n' && *input != '\0') {
+			input++;
+		}
+	}
+	*argv = '\0'; //marks end of list
+}
+
+pid_t execProg(char** argv) {
+	pid_t pid = 0;
+	if((pid = fork()) < 0) {
+		cerr << "Error forking child." << endl;
+	}
+	else if(pid == 0) {
+		//child process, switch exec
+		execvp(*argv, argv);
+	}
+	else {
+		return pid;
+	}
+}
+
+//currently runs immediately upon creation. Consider using a signal to kick all off closer to
+//the same time.
+void bench(const char* con_str, int thread_num) {
+	memcached_st* memc = memcached(con_str, strlen(con_str));
+	if(!memc) cout << "Couldn't connect" << endl;
+	
+	default_random_engine gen;
+	uniform_int_distribution<int> dist(0, keyMap.size()-1); //evenly create indices for keyMap
+
+	for(int n = 0; n < config.num_cmds; ++n) {
+		auto i = keyMap.begin();
+		advance(i, dist(gen));
+		string key = i->first;
+		//get random key
+		char* value;
+		memcached_return_t rc = uu_get(memc, key.c_str(), &value); //BUSTED not returning good values
+		
+		if(rc == MEMCACHED_SUCCESS) {
+			cout <<" VALUE: " << strlen(value) << endl;
+			test::Chunk tmp;
+			string buf;
+			buf.assign(value);
+			free(value);
+			//simulate parsing and serializing again
+			tmp.ParseFromString(buf);
+			//some arbitrary work here
+			tmp.SerializeToString(&buf);
+			rc = uu_set(memc, key.c_str(), buf.c_str(), buf.length());
+			
+			if(rc != MEMCACHED_SUCCESS) {
+				cout << "In thread: " << memcached_strerror(memc, rc) << endl;
+			}
+		}
+		else {
+			cout << "Get failed." << endl;
+		}
+	}
+
+	memcached_free(memc);
+}
+
+//fill cached with junk data. Cache max size is 64MB by default
+void initCache(const char* con_str, Config& config, int mB = 64) {
+
+	this_thread::sleep_for(chrono::seconds(3));	
+	memcached_st* memc = memcached(con_str, strlen(con_str));
+
+	if(!memc) cout << "Couldn't connect" << endl;
+	
+	srand(getElapsedTime());
+	string buf;
+	for(int i = 0; i < config.num_objects; ++i) {
+		randStr(buf, 10);
+		cout << "STRING: " << buf << endl;
+		keyMap[buf] = 0;
+	}
+
+	for(auto i = keyMap.begin(), e = keyMap.end(); i != e; i++) {
+		test::Chunk f;
+		for(int j = 0; j < MEGA_BYTE*3/4*0.01; j+=4) {
+			f.add_data(rand()); //adds a random 4-byte entry
+		}
+		string val;
+		f.SerializeToString(&val);
+		memcached_return_t rc = uu_set(memc, i->first.c_str(), val.c_str(), val.length());
+		if(rc != MEMCACHED_SUCCESS) {
+			cout << memcached_strerror(memc, rc) << endl;
+		}
+	}
+	memcached_free(memc);
+}
+
+int main(int argc, char* argv[]) {
+	
+	GOOGLE_PROTOBUF_VERIFY_VERSION; //check for protobuf compatibility
+	
+	if(benchConfig(argc, argv, config)) {
+		cout << "Parsing failed" << endl;
+		return -1;
+	}
+	char* argvp[64];
+	char line[1024];
+	char con_str[1024];
+	
+	strcpy(line, config.buildLoc);
+	if(config.port) {	
+		strncat(line, MEM_SERVER_FLAGS, 1024-strlen(line));
+		strncat(line, config.port, 1024-strlen(line));	
+	}
+	//parses command line into char** for execvp
+	parseArgs(line, argvp);
+	pid_t pid = execProg(argvp);
+
+	//create multiple threads and connect
+	list<thread*> thread_list;
+
+	//setup connection string ex. "--BINARY-PROTOCOL --SERVER=localhost:PORT_NUM"
+	strcpy(con_str, MEM_SERVER_CONF);
+	strncat(con_str, config.port, 1024-strlen(con_str));
+	//create appropriate number of threads and execute bench on each.
+	initCache(con_str, config);
+	
+	uint64_t start = getElapsedTime();
+	for(int i = 0; i < config.num_threads; ++i) {
+		thread_list.push_front(new thread(bench, con_str, i));
+	}
+	
+	//wait for each thread to finish and clean up
+	while(thread_list.size() > 0) {	
+		thread* t = thread_list.front();
+		t->join();
+		thread_list.pop_front();
+		free(t);
+	}
+	cout << "All threads joined" << endl;
+	config.time = getElapsedTime() - start;
+	cout << "Total time: " << (double)config.time/1000000000 << endl;
+	
+	//simple loop to browse keys
+	memcached_st* memc = memcached(con_str, strlen(con_str));
+	cout << "Enter a key to search or nothing to quit: " << endl;
+	string input;
+	getline(cin, input);
+	while(input.length() > 0) {
+		char* val;
+		memcached_return_t rc = uu_get(memc, input.c_str(), &val);
+		if(rc == MEMCACHED_SUCCESS) {
+			test::Chunk f;
+			string buf;
+			buf.assign(val);
+			f.ParseFromString(buf);
+			cout << input << " -> " << f.data(10)  << endl;
+			free(val);
+		}
+		else {
+			cerr << memcached_strerror(memc, rc) << endl; //display an error message otherwise
+		}
+		cout << "Enter a key to search or nothing to quit: " << endl;
+		getline(cin, input); 
+	}
+	memcached_free(memc); //free connection used for get
+
+	kill(pid, SIGKILL); //kill memcached server
+	google::protobuf::ShutdownProtobufLibrary(); //protobuf cleanup
+
+	return 0;	
+}
+//more deterministic for checking
+//revisit get and set 
+//misunderstanding with binary data being stored. 
+memcached_return_t set(memcached_st* memc, const char* key, const char* val) {
+	//no expire and set no flags
+	memcached_return_t rc = memcached_set(memc, key, strlen(key), val, strlen(val), 0, 0);
+	return rc;
+}
+memcached_return_t get(memcached_st* memc, const char* key, char** val) {
+	size_t val_size;
+	uint32_t flags;
+	memcached_return_t rc;
+	
+	*val = memcached_get(memc, key, strlen(key), &val_size, &flags, &rc);
+		
+	return rc;
+}
+
+memcached_return_t uu_set(memcached_st* memc, const char* key, const char* val, size_t size) {
+	char* uVal;
+	int uSize = uuencode(&uVal, val, size);
+	memcached_return_t rc = memcached_set(memc, key, strlen(key), uVal, uSize, 0, 0);
+	free(uVal);
+	return rc;
+}
+
+memcached_return_t uu_get(memcached_st* memc, const char* key, char** val) {
+	char* uVal;
+	size_t val_size;
+	uint32_t flags;
+	memcached_return_t rc;
+
+	uVal = memcached_get(memc, key, strlen(key), &val_size, &flags, &rc);
+	uudecode(val, uVal, val_size);
+	free(uVal);	
+
+	return rc;
+}
+
+void randStr(string& str, int len) {
+	const char table[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	char buf[len+1]; buf[0] = table[rand()%(sizeof(table)-1-10)+10]; //make sure it starts with a character
+	buf[len] = '\0';
+	for(int i = 1; i < len; ++i) {
+		buf[i] = table[rand()%(sizeof(table)-1)];
+	}
+	str.assign(buf);
+}

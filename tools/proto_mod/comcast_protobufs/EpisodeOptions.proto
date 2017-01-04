@@ -1,0 +1,10 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "EpisodeOptionsProto";
+
+enum EpisodeOptions {
+    OnlyNew = 0;
+    NewAndRepeats = 1;
+    AllWithDuplicates = 2;
+}

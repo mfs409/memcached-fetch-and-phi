@@ -1,0 +1,24 @@
+BUILD_DIR=${1:-'./memcached_build'}
+MEMCACHED_SRC=${2:-'./memcached-1.4.20'}
+CURR_DIR=$(pwd)
+
+if ls $BUILD_DIR > /dev/null
+then
+	#directory exists, let's configure and go
+
+	#get absolute paths to the destination and source directories
+	BUILD_DIR=$(readlink -f $BUILD_DIR)
+	MEMCACHED_SRC=$(readlink -f $MEMCACHED_SRC)
+	
+	#change working directory the source and perform all configuration
+	cd $MEMCACHED_SRC
+	make distclean #cleans up any previous configuration
+	./configure --prefix=$BUILD_DIR
+	make
+	make install
+	cd $CURR_DIR
+else
+	#no directory
+	echo $BUILD_DIR' does not exist. Please create it before proceeding.'
+	echo 'USAGE: build_memcached BUILD_DIR MEMCACHED_DIR'
+fi

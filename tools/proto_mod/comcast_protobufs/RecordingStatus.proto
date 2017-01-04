@@ -1,0 +1,22 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "RecordingStatusProto";
+
+enum RecordingStatus {
+    PendingNoConflict = 0;
+    PendingWithConflict = 1;
+    Stopped = 2;
+    StartedIncomplete = 3;
+    StartedInsufficientSpace = 4;
+    StartedWithError = 5;
+    Started = 6;
+    Failed = 7;
+    Incomplete = 8;
+    Complete = 9;
+    Deleted = 10;
+    Erased = 11;
+    UnknownR = 12;
+    Missing = 13;
+    Foreign = 14;
+}

@@ -1,0 +1,12 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data.reference";
+option java_outer_classname = "AiringTypeProto";
+
+enum AiringType {
+    New = 0;
+    Live = 1;
+    Repeat = 2;
+    Taped = 3;
+    Unknown = 4;
+}

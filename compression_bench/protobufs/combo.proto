@@ -1,0 +1,6 @@
+package test;
+
+message Combo {
+	required string str = 1;
+	repeated int64 i = 2;
+}

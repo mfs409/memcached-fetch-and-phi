@@ -1,0 +1,16 @@
+/memcached-1.4.20/doc/Makefile
+/memcached-1.4.20/memcached
+/memcached-1.4.20/memcached-debug
+/memcached-1.4.20/sizes
+/memcached-1.4.20/stamp-h1
+/memcached-1.4.20/testapp
+/memcached-1.4.20/timedrun
+/tools/dev/
+/tools/include/*.so
+*.class
+*.o
+*/autom4te.cache/
+*.gcno
+config.log
+config.status
+.deps/

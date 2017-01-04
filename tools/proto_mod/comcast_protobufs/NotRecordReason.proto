@@ -1,0 +1,12 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "NotRecordReasonProto";
+
+enum NotRecordReason {
+    Canceled = 0;
+    NotEnoughSlots = 1;
+    AlreadyRecorded = 2;
+    NotEntitled = 3;
+    SystemCanceled = 5;
+}

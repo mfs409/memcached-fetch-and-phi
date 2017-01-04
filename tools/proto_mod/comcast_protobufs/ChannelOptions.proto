@@ -1,0 +1,13 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "ChannelOptionsProto";
+
+enum ChannelOptions {
+    ThisChannelOnly = 0;
+    AllChannels = 1;
+    HDprefSD = 2;
+    SDprefHD = 3;
+    SDOnly = 4;
+    HDOnly = 5;
+}

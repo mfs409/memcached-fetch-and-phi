@@ -1,0 +1,12 @@
+package scheduler;
+
+option java_package = "com.comcast.data.protobuf.message.scheduler";
+option java_outer_classname = "RecordingSegmentProto";
+
+message RecordingSegment {
+  required int64 actualStart = 1;
+  required int64 actualEnd = 2;
+  required int32 segmentNumber = 3;
+  optional string volume = 4;
+  optional string playBackLocator = 5;
+}

@@ -1,0 +1,12 @@
+package scheduler;
+
+option java_package = "com.hercules.serverdata.data";
+option java_outer_classname = "FrequencyOptionsProto";
+
+enum FrequencyOptions {
+    Once = 0;
+    Always = 1;
+    OnceADay = 2;
+    OnceAWeek = 3;
+    SatToSun = 4;
+}

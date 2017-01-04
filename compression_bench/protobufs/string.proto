@@ -1,0 +1,6 @@
+package test;
+
+message String {
+	required fixed32 data = 1;
+	repeated string str = 2;
+}
